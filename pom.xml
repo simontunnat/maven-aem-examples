@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.tunnat</groupId>
+    <artifactId>maven-parent</artifactId>
+    <version>2006.2</version>
+  </parent>
+
+  <groupId>org.tunnat.aem</groupId>
+  <artifactId>examples</artifactId>
+  <version>${revision}</version>
+  <packaging>pom</packaging>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>Maven AEM Examples</description>
+  <url>https://github.com/simontunnat/maven-aem-examples</url>
+
+  <licenses>
+    <license>
+      <name>Apache-2.0</name>
+      <url>https://opensource.org/licenses/Apache-2.0</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>simontunnat</id>
+      <name>Simon Tunnat</name>
+      <email>simon@tunn.at</email>
+    </developer>
+  </developers>
+
+  <properties>
+    <revision>1.0-SNAPSHOT</revision>
+
+    <aem.version>6.5.5</aem.version>
+
+    <maven-bundle-plugin.version>4.2.1</maven-bundle-plugin.version>
+    <bnd.version>5.1.1</bnd.version>
+    <content-package-maven-plugin.version>0.0.24</content-package-maven-plugin.version>
+    <filevault-package-maven-plugin.version>1.1.2</filevault-package-maven-plugin.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.tunnat.aem</groupId>
+        <artifactId>example-bundle1</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.tunnat.aem</groupId>
+        <artifactId>example-bundle2</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.adobe.aem</groupId>
+        <artifactId>uber-jar</artifactId>
+        <version>${aem.version}</version>
+        <classifier>apis</classifier>
+        <scope>provided</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!-- Deprecated: Use bnd-maven-plugin instead -->
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>${maven-bundle-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>biz.aQute.bnd</groupId>
+          <artifactId>bnd-maven-plugin</artifactId>
+          <version>${bnd.version}</version>
+          <executions>
+            <execution>
+              <id>bnd-process</id>
+              <goals>
+                <goal>bnd-process</goal>
+              </goals>
+              <configuration>
+                <bnd><![CDATA[
+                  # reproducible builds (https://github.com/bndtools/bnd/issues/3521)
+                  -noextraheaders: true
+                  -snapshot: SNAPSHOT
+                ]]></bnd>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Deprecated: Use filevault-package-maven-plugin instead -->
+        <plugin>
+          <groupId>com.day.jcr.vault</groupId>
+          <artifactId>content-package-maven-plugin</artifactId>
+          <version>${content-package-maven-plugin.version}</version>
+          <configuration>
+            <filterSource>${project.basedir}/src/main/content/META-INF/vault/filter.xml</filterSource>
+            <failOnError>true</failOnError>
+            <failOnMissingEmbed>true</failOnMissingEmbed>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.jackrabbit</groupId>
+          <artifactId>filevault-package-maven-plugin</artifactId>
+          <version>${filevault-package-maven-plugin.version}</version>
+          <configuration>
+            <filterSource>${project.basedir}/src/main/content/META-INF/vault/filter.xml</filterSource>
+            <failOnMissingEmbed>true</failOnMissingEmbed>
+            <failOnUncoveredSourceFiles>true</failOnUncoveredSourceFiles>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <modules>
+    <module>example-bundle1</module>
+    <module>example-bundle2</module>
+    <module>example-package1</module>
+    <module>example-package2</module>
+  </modules>
+
+  <profiles>
+    <profile>
+      <id>aem-repos</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+
+      <repositories>
+        <repository>
+          <id>adobe-public-releases</id>
+          <name>Adobe Public Repository</name>
+          <url>https://repo.adobe.com/nexus/content/groups/public/</url>
+          <layout>default</layout>
+        </repository>
+      </repositories>
+
+      <pluginRepositories>
+        <pluginRepository>
+          <id>adobe-public-releases</id>
+          <name>Adobe Public Repository</name>
+          <url>https://repo.adobe.com/nexus/content/groups/public/</url>
+          <layout>default</layout>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+</project>
